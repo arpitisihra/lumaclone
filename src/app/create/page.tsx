@@ -1,48 +1,153 @@
 // src/app/create/page.tsx
 'use client'; // This directive tells Next.js to render this component only on the client-side.
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Assuming you might use useRouter
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner'; // For user notifications
 
-// Example of a component that might use localStorage for something like theme
 const CreateEventPage: React.FC = () => {
   const router = useRouter();
-  const [theme, setTheme] = useState('light'); // Example state for theme
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [imageUrl, setImageUrl] = useState(''); // For optional image URL
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // This code will ONLY run in the browser environment
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('appTheme');
-      if (savedTheme) {
-        setTheme(savedTheme);
-      }
-      // You can also use localStorage.setItem here if needed
-      // localStorage.setItem('lastVisitedPage', router.pathname);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    toast.loading('Creating event...');
+
+    // For a real app, you'd get the actual organizerId (e.g., from a logged-in user session)
+    // For this example, we'll use a placeholder or a default user ID if available in your DB.
+    // Make sure you have at least one user in your Supabase 'User' table
+    // You can manually add a user in Supabase Studio -> Table Editor -> 'User' table
+    // Or, if your app has a signup flow, sign up a user first.
+    const organizerId = 'YOUR_DEFAULT_ORGANIZER_ID'; // <<< IMPORTANT: REPLACE THIS WITH A REAL USER ID FROM YOUR SUPABASE 'User' TABLE
+
+    if (organizerId === 'YOUR_DEFAULT_ORGANIZER_ID') {
+      toast.error('Please replace YOUR_DEFAULT_ORGANIZER_ID with a real user ID from your Supabase User table.');
+      setLoading(false);
+      return;
     }
-  }, []); // Empty dependency array means this effect runs once after initial render in the browser
 
-  // The rest of your page component's logic and JSX goes here.
-  // This is just a placeholder to demonstrate the localStorage fix.
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          date,
+          location,
+          imageUrl,
+          organizerId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || 'Event created successfully!');
+        // Clear form or redirect
+        setTitle('');
+        setDescription('');
+        setDate('');
+        setLocation('');
+        setImageUrl('');
+        router.push('/home'); // Redirect to home or events list
+      } else {
+        toast.error(data.message || 'Failed to create event.');
+        console.error('API Error:', data.error);
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred.');
+      console.error('Network or unexpected error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Create New Event</h1>
-        <p className="text-gray-600">
-          This is the create event page. Current theme: {theme}
-        </p>
-        <button
-          onClick={() => {
-            const newTheme = theme === 'light' ? 'dark' : 'light';
-            setTheme(newTheme);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('appTheme', newTheme);
-            }
-          }}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Toggle Theme
-        </button>
-        {/* Add your actual event creation form and logic here */}
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">Create New Event</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-1">
+              Event Title:
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-1">
+              Description:
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24"
+              required
+            ></textarea>
+          </div>
+          <div>
+            <label htmlFor="date" className="block text-gray-700 text-sm font-bold mb-1">
+              Date & Time:
+            </label>
+            <input
+              type="datetime-local"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="location" className="block text-gray-700 text-sm font-bold mb-1">
+              Location:
+            </label>
+            <input
+              type="text"
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="imageUrl" className="block text-gray-700 text-sm font-bold mb-1">
+              Image URL (Optional):
+            </label>
+            <input
+              type="url"
+              id="imageUrl"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="e.g., https://example.com/event-banner.jpg"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Creating...' : 'Create Event'}
+          </button>
+        </form>
       </div>
     </div>
   );
