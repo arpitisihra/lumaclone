@@ -24,13 +24,17 @@ const CreateEventPage: React.FC = () => {
     // Make sure you have at least one user in your Supabase 'User' table
     // You can manually add a user in Supabase Studio -> Table Editor -> 'User' table
     // Or, if your app has a signup flow, sign up a user first.
-    const organizerId = 'YOUR_DEFAULT_ORGANIZER_ID'; // <<< IMPORTANT: REPLACE THIS WITH A REAL USER ID FROM YOUR SUPABASE 'User' TABLE
+    const organizerId = '979324c7-1f2b-485f-b2ab-f7586741b173'; // <<< THIS HAS BEEN UPDATED WITH YOUR ID
 
-    if (organizerId === 'YOUR_DEFAULT_ORGANIZER_ID') {
-      toast.error('Please replace YOUR_DEFAULT_ORGANIZER_ID with a real user ID from your Supabase User table.');
+    // The previous check was: if (organizerId === 'YOUR_DEFAULT_ORGANIZER_ID') { ... return; }
+    // This new error indicates the request is now reaching the backend with a null/invalid ID.
+    // So, ensure organizerId is a valid string from your Supabase User table.
+    if (!organizerId || organizerId === 'YOUR_DEFAULT_ORGANIZER_ID') { // Keep this check for future safety
+      toast.error('Organizer ID is missing or invalid. Please replace the placeholder.');
       setLoading(false);
       return;
     }
+
 
     try {
       const response = await fetch('/api/events', {
