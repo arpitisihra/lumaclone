@@ -16,8 +16,9 @@ model User {
   id        String    @id @default(cuid())
   email     String    @unique
   name      String?
-  password  String? // Password can be optional if using social logins
+  password  String?   // Password can be optional if using social logins
   image     String?   // For user profile pictures
+  verified  Boolean   @default(false) // NEW: Field to track if the user's account is verified
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   events    Event[]   // A user can create many events
