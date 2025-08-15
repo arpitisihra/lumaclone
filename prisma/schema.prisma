@@ -4,6 +4,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// This block defines how Prisma connects to your database.
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -20,6 +21,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   events    Event[]   // A user can create many events
+  otpcodes  OTPCodes[] // A user can have many OTP codes
 }
 
 // Event Model: Represents an event created by a user
@@ -34,4 +36,17 @@ model Event {
   organizer   User      @relation(fields: [organizerId], references: [id]) // Link to the User model
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// OTPCodes Model: Stores one-time passwords for user verification
+model OTPCodes {
+  id        String    @id @default(cuid())
+  userId    String    // ID of the user this OTP belongs to
+  user      User      @relation(fields: [userId], references: [id]) // Link to the User model
+  code      String    // The actual OTP code
+  expiresAt DateTime  // When the OTP expires
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([userId, code]) // Ensures a user doesn't have duplicate active codes
 }
