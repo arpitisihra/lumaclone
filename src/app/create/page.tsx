@@ -1,68 +1,51 @@
-"use client";
-import { RandomBg } from "@/components/Background/RandomBg";
-import EventForm from "@/components/CreateEvent/EventForm/EventForm";
-import ImageSelection from "@/components/CreateEvent/ImageSelection/ImageSelection";
-import { Header } from "@/components/Header";
-import { SignIn } from "@/components/SignIn/SignIn";
-import { Welcome } from "@/components/Welcome/Welcome";
-import { api } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+// src/app/create/page.tsx
+'use client'; // This directive tells Next.js to render this component only on the client-side.
 
-export default function Page() {
-  const { t } = useTranslation();
-  document.title = t("titles.createEvent");
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'; // Assuming you might use useRouter
 
+// Example of a component that might use localStorage for something like theme
+const CreateEventPage: React.FC = () => {
   const router = useRouter();
-
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [hasChecked, setHasChecked] = useState(false);
+  const [theme, setTheme] = useState('light'); // Example state for theme
 
   useEffect(() => {
-    const validateToken = async () => {
-      // Garantir que a validação só aconteça uma vez
-      if (hasChecked) return;
-
-      if (localStorage.getItem("token")) {
-        const resp = await api.get("/api/auth/validate-token", {});
-        if (resp.status === 200) {
-          setIsSignedIn(true);
-        } else {
-          localStorage.removeItem("token");
-          router.push("/signin");
-        }
-      } else {
-        router.push("/signin");
+    // This code will ONLY run in the browser environment
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('appTheme');
+      if (savedTheme) {
+        setTheme(savedTheme);
       }
+      // You can also use localStorage.setItem here if needed
+      // localStorage.setItem('lastVisitedPage', router.pathname);
+    }
+  }, []); // Empty dependency array means this effect runs once after initial render in the browser
 
-      setHasChecked(true); // Agora, após a validação, podemos marcar como "verificado"
-    };
-
-    validateToken();
-  }, [hasChecked, router]); // Coloque `router` na dependência para evitar possíveis problemas
-
-  const [colors, setColors] = useState<string>("#212121");
-
+  // The rest of your page component's logic and JSX goes here.
+  // This is just a placeholder to demonstrate the localStorage fix.
   return (
-    <>
-        <div className="z-[-1] fixed top-0 left-0 right-0 bottom-0">
-            <div 
-                className="w-full h-full" 
-                style={{ opacity: 0.1, backgroundColor: colors }}
-            />
-        </div>
-      <Header isSignedIn={isSignedIn} />
-      <main>
-        {!isSignedIn ? (
-          ""
-        ) : (
-          <div className="flex flex-row gap-2 justify-center w-full">
-            <ImageSelection returnImageColors={setColors} />
-            <EventForm />
-          </div>
-        )}
-      </main>
-    </>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Create New Event</h1>
+        <p className="text-gray-600">
+          This is the create event page. Current theme: {theme}
+        </p>
+        <button
+          onClick={() => {
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('appTheme', newTheme);
+            }
+          }}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Toggle Theme
+        </button>
+        {/* Add your actual event creation form and logic here */}
+      </div>
+    </div>
   );
-}
+};
+
+export default CreateEventPage;
