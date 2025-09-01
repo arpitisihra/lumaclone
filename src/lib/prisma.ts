@@ -1,18 +1,20 @@
-    import { PrismaClient } from '@prisma/client';
+// src/lib/prisma.ts
+// This file provides a singleton instance of the Prisma Client.
 
-    const prismaClientSingleton = () => {
-      return new PrismaClient();
-    };
+import { PrismaClient } from '@prisma/client';
 
-    declare global {
-      var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
-    }
+let prisma: PrismaClient;
 
-    const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  // @ts-ignore
+  if (!global.prisma) {
+    // @ts-ignore
+    global.prisma = new PrismaClient();
+  }
+  // @ts-ignore
+  prisma = global.prisma;
+}
 
-    export default prisma;
-
-    if (process.env.NODE_ENV !== 'production') {
-      globalThis.prismaGlobal = prisma;
-    }
-    
+export default prisma;
