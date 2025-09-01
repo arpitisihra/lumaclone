@@ -95,7 +95,6 @@ const HomePage: React.FC = () => {
           </div>
         )}
       </div>
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 };
