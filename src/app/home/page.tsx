@@ -1,8 +1,8 @@
-'use client'; // This directive tells Next.js to render this component only on the client-side.
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 
 interface Event {
   id: string;
@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
                 <img
                   src={event.imageUrl || 'https://placehold.co/600x400/FFF/000?text=Event+Image'}
                   alt={event.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-fill"
                 />
                 <div className="p-4">
                   <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
@@ -95,6 +95,7 @@ const HomePage: React.FC = () => {
           </div>
         )}
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   );
 };

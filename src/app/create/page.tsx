@@ -162,7 +162,7 @@ const CreateEventPage = () => {
                 <img
                   src={imagePreviewUrl}
                   alt="Image preview"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-fill"
                 />
               </div>
             )}
