@@ -35,7 +35,6 @@ const CreateEventPage = () => {
 
     let finalImageUrl: string | undefined = undefined;
 
-    // Upload image to the new backend API if a file was selected
     if (imageFile) {
       const formData = new FormData();
       formData.append('file', imageFile);
@@ -61,7 +60,6 @@ const CreateEventPage = () => {
       }
     }
 
-    // Now submit the event data
     const eventData = {
       title,
       description,
