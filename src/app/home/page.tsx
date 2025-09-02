@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast, Toaster } from 'sonner';
+import Link from 'next/link';
 
 interface Event {
   id: string;
@@ -78,19 +79,21 @@ const HomePage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <img
-                  src={event.imageUrl || 'https://placehold.co/600x400/FFF/000?text=Event+Image'}
-                  alt={event.title}
-                  className="w-full h-48 object-fill"
-                />
-                <div className="p-4">
-                  <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
-                  <p className="text-gray-600 text-sm mb-2">{new Date(event.date).toLocaleString()}</p>
-                  <p className="text-gray-700 text-sm">{event.description}</p>
-                  <p className="text-gray-500 text-xs mt-2">Location: {event.location}</p>
+              <Link key={event.id} href={`/events/${event.id}`}>
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow">
+                  <img
+                    src={event.imageUrl || 'https://placehold.co/600x400/FFF/000?text=Event+Image'}
+                    alt={event.title}
+                    className="w-full h-48 object-contain"
+                  />
+                  <div className="p-4">
+                    <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
+                    <p className="text-gray-600 text-sm mb-2">{new Date(event.date).toLocaleString()}</p>
+                    <p className="text-gray-700 text-sm">{event.description}</p>
+                    <p className="text-gray-500 text-xs mt-2">Location: {event.location}</p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
