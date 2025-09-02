@@ -179,7 +179,6 @@ const CreateEventPage = () => {
           </button>
         </form>
       </div>
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 };
