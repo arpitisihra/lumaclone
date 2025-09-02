@@ -160,11 +160,11 @@ const CreateEventPage = () => {
               className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
             />
             {imagePreviewUrl && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 aspect-video flex justify-center overflow-hidden rounded-md shadow-md">
                 <img
                   src={imagePreviewUrl}
                   alt="Image preview"
-                  className="rounded-md shadow-md max-h-96 w-auto"
+                  className="w-full h-full object-cover"
                 />
               </div>
             )}
@@ -181,6 +181,7 @@ const CreateEventPage = () => {
           </button>
         </form>
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   );
 };
