@@ -28,19 +28,3 @@ export async function GET(
     return NextResponse.json({ message: 'Failed to fetch event details' }, { status: 500 });
   }
 }
-```
-
----
-
-### Final Steps: Commit and Push to Deploy 🚀
-
-Once you have made all these changes and saved the files, you can push them to GitHub.
-
-1.  Open your Terminal and navigate to your `lumaclone` project folder.
-2.  Run the following commands one by one:
-
-    ```bash
-    git add src/app/home/page.tsx src/app/events/[id]/page.tsx src/app/api/events/[id]/route.ts
-    git commit -m "Feat: Add event details page and API route"
-    git push origin main
-    
