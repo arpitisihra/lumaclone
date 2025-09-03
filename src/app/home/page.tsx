@@ -84,7 +84,7 @@ const HomePage: React.FC = () => {
                   <img
                     src={event.imageUrl || 'https://placehold.co/600x400/FFF/000?text=Event+Image'}
                     alt={event.title}
-                    className="w-full h-48 object-contain"
+                    className="w-full h-48 object-cover"
                   />
                   <div className="p-4">
                     <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
