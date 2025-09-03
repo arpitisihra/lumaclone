@@ -3,19 +3,17 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     if (!id) {
       return NextResponse.json({ message: 'Event ID is required' }, { status: 400 });
     }
 
     const event = await prisma.event.findUnique({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
     if (!event) {
