@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+// Define the shape of the context that Next.js passes in
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { id } = context.params;
 
     if (!id) {
-      return NextResponse.json({ message: 'Event ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { message: 'Event ID is required' },
+        { status: 400 }
+      );
     }
 
     const event = await prisma.event.findUnique({
@@ -17,7 +24,10 @@ export async function GET(
     });
 
     if (!event) {
-      return NextResponse.json({ message: 'Event not found' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'Event not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ event }, { status: 200 });
