@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // adjust path if needed
+import prisma from "@/lib/prisma"; // ✅ default import
 
-// GET /api/events/[id]
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  req: Request,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params; // ✅ must await
 
-    // Fetch event by ID
     const event = await prisma.event.findUnique({
       where: { id },
     });
@@ -21,6 +19,9 @@ export async function GET(
     return NextResponse.json(event);
   } catch (error) {
     console.error("Error fetching event:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
