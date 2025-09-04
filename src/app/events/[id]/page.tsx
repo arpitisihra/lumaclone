@@ -1,155 +1,103 @@
-'use client';
+import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
 
-import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { toast, Toaster } from 'sonner';
+export default async function EventPage({ params }: { params: { id: string } }) {
+  const event = await prisma.event.findUnique({
+    where: { id: params.id },
+  });
 
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  location: string;
-  imageUrl?: string | null;
-  organizerId: string;
-}
-
-const EventDetailsPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (id) {
-      const fetchEvent = async () => {
-        try {
-          const response = await fetch(`/api/events/${id}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch event details');
-          }
-          const data = await response.json();
-          setEvent(data.event);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-          toast.error('Failed to load event details.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchEvent();
-    }
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading event details...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">Error: {error}</p>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Event not found.</p>
-      </div>
-    );
-  }
+  if (!event) return notFound();
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
-      <div className="max-w-7xl w-full flex flex-col md:flex-row gap-8 bg-white p-6 rounded-3xl shadow-lg">
-        {/* Left Side: Image and Sidebar */}
-        <div className="flex-1 space-y-6">
-          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-md">
+    <div className="w-full min-h-screen bg-gray-50 text-gray-900">
+      {/* Top banner */}
+      <div className="w-full border-b border-gray-200">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 py-8 px-4">
+          
+          {/* LEFT COLUMN (fixed width like Luma ~420px) */}
+          <div className="w-full md:w-[420px] flex-shrink-0">
             <img
-              src={event.imageUrl || 'https://placehold.co/800x1067/F0F0F0/000?text=Event+Image'}
+              src={event.imageUrl || "https://placehold.co/420x420/FFF/000?text=Event+Image"}
               alt={event.title}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="w-[420px] h-[420px] object-cover rounded-xl border"
             />
-          </div>
-          <div className="p-4 bg-gray-50 rounded-2xl shadow-inner space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-gray-800">Hosted By</h3>
-              {/* This could be a link to the organizer's page */}
-              <p className="text-indigo-600 font-semibold cursor-pointer hover:underline">Defactor</p>
-            </div>
-            <div className="text-gray-500 text-sm">
-              61 Going
-            </div>
-            <button className="text-red-500 text-sm hover:underline">
-              Report Event
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-indigo-500 text-sm">#Crypto</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Right Side: Event Details */}
-        <div className="flex-1 space-y-6">
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-4">{event.title}</h1>
+            <div className="mt-4">
+              <h3 className="font-semibold text-sm text-gray-500">Hosted By</h3>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                  {event.host?.charAt(0) || "H"}
+                </div>
+                <p className="font-medium">{event.host || "Unknown Host"}</p>
+              </div>
+            </div>
 
-          {/* Date and Time */}
-          <div className="flex items-center gap-4 text-gray-600">
-            <div className="text-center font-bold text-lg">
-              <p className="uppercase text-indigo-600">
-                {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
-              </p>
-              <p className="text-3xl">
-                {new Date(event.date).toLocaleDateString('en-US', { day: '2-digit' })}
-              </p>
-            </div>
-            <div className="text-md">
-              <p className="font-semibold">{new Date(event.date).toLocaleDateString('en-US', { weekday: 'long' })}, {new Date(event.date).toLocaleDateString()}</p>
-              <p>{new Date(event.date).toLocaleTimeString()}</p>
-              <p className="text-sm">{new Date(event.date).toTimeString().split(' ')[1]}</p>
-            </div>
-          </div>
-
-          {/* Registration Section */}
-          <div className="bg-gray-50 p-6 rounded-2xl shadow-inner space-y-4">
-            <h2 className="text-xl font-bold text-gray-800">Registration</h2>
-            <div className="flex items-start gap-3">
-              <p className="text-gray-600">Approval Required</p>
-            </div>
-            <p className="text-sm text-gray-500">Your registration is subject to approval by the host.</p>
-            <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <p className="text-gray-700 font-semibold mb-2">Welcome! To join the event, please register below.</p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition-colors">
-                  Request to Join
-                </button>
+            <div className="mt-6 text-sm text-gray-600">
+              <p>{event.attendees?.length || 0} Going</p>
+              {/* Render small circles like Luma */}
+              <div className="mt-2 flex -space-x-2">
+                {event.attendees?.slice(0, 4).map((att: any, i: number) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"
+                  />
+                ))}
               </div>
             </div>
           </div>
 
-          {/* About Event */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-800">About Event</h2>
-            <p className="text-gray-700 leading-relaxed">{event.description}</p>
+          {/* RIGHT COLUMN (content area) */}
+          <div className="flex-1">
+            {/* Featured Tag */}
+            <div className="text-sm text-purple-600 font-medium mb-2">
+              Featured in #Web3 Events
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl font-bold">{event.title}</h1>
+
+            {/* Date & Time */}
+            <div className="mt-4 flex items-center gap-3 text-gray-600">
+              <div className="flex items-center gap-1">
+                <span className="font-medium">
+                  {new Date(event.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>
+                  {new Date(event.date).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Register CTA */}
+            <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+              <h2 className="font-semibold text-lg">Registration</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Approval Required – Your registration is subject to host approval.
+              </p>
+              <button className="mt-4 w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">
+                Request to Join
+              </button>
+            </div>
+
+            {/* About Section */}
+            <div className="mt-8">
+              <h2 className="text-xl font-bold">About Event</h2>
+              <p className="mt-2 text-gray-700 leading-relaxed whitespace-pre-line">
+                {event.description || "No description provided."}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <button
-        onClick={() => router.push('/home')}
-        className="mt-8 px-6 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition-colors"
-      >
-        Back to Events
-      </button>
-      <Toaster position="bottom-right" richColors />
     </div>
   );
-};
-
-export default EventDetailsPage;
+}
