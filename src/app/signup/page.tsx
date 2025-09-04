@@ -19,7 +19,13 @@ const SignUpPage = () => {
   };
 
   const handleGoogleSignIn = () => {
-    toast.info('Google Sign-in is a future feature!');
+    // Redirect to Google's OAuth consent screen
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/api/auth/google-signin/callback`;
+    const scope = 'openid email profile';
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline`;
+    
+    window.location.href = googleAuthUrl;
   };
 
   return (
@@ -81,5 +87,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-
-    
