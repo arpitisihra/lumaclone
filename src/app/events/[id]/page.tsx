@@ -1,103 +1,94 @@
-import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
+'use client';
 
-export default async function EventPage({ params }: { params: { id: string } }) {
-  const event = await prisma.event.findUnique({
-    where: { id: params.id },
-  });
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { toast, Toaster } from 'sonner';
 
-  if (!event) return notFound();
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  imageUrl?: string | null;
+  organizerId: string;
+}
+
+const EventDetailsPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (id) {
+      const fetchEvent = async () => {
+        try {
+          const response = await fetch(`/api/events/${id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch event details');
+          }
+          const data = await response.json();
+          setEvent(data.event);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+          toast.error('Failed to load event details.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchEvent();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading event details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Event not found.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 text-gray-900">
-      {/* Top banner */}
-      <div className="w-full border-b border-gray-200">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 py-8 px-4">
-          
-          {/* LEFT COLUMN (fixed width like Luma ~420px) */}
-          <div className="w-full md:w-[420px] flex-shrink-0">
-            <img
-              src={event.imageUrl || "https://placehold.co/420x420/FFF/000?text=Event+Image"}
-              alt={event.title}
-              className="w-[420px] h-[420px] object-cover rounded-xl border"
-            />
-
-            <div className="mt-4">
-              <h3 className="font-semibold text-sm text-gray-500">Hosted By</h3>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
-                  {event.host?.charAt(0) || "H"}
-                </div>
-                <p className="font-medium">{event.host || "Unknown Host"}</p>
-              </div>
-            </div>
-
-            <div className="mt-6 text-sm text-gray-600">
-              <p>{event.attendees?.length || 0} Going</p>
-              {/* Render small circles like Luma */}
-              <div className="mt-2 flex -space-x-2">
-                {event.attendees?.slice(0, 4).map((att: any, i: number) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN (content area) */}
-          <div className="flex-1">
-            {/* Featured Tag */}
-            <div className="text-sm text-purple-600 font-medium mb-2">
-              Featured in #Web3 Events
-            </div>
-
-            {/* Title */}
-            <h1 className="text-3xl font-bold">{event.title}</h1>
-
-            {/* Date & Time */}
-            <div className="mt-4 flex items-center gap-3 text-gray-600">
-              <div className="flex items-center gap-1">
-                <span className="font-medium">
-                  {new Date(event.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span>
-                  {new Date(event.date).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            </div>
-
-            {/* Register CTA */}
-            <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-              <h2 className="font-semibold text-lg">Registration</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Approval Required – Your registration is subject to host approval.
-              </p>
-              <button className="mt-4 w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">
-                Request to Join
-              </button>
-            </div>
-
-            {/* About Section */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold">About Event</h2>
-              <p className="mt-2 text-gray-700 leading-relaxed whitespace-pre-line">
-                {event.description || "No description provided."}
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <img
+          src={event.imageUrl || 'https://placehold.co/1200x600/FFF/000?text=Event+Image'}
+          alt={event.title}
+          className="w-full rounded-md object-contain"
+        />
+        <div className="mt-6">
+          <h1 className="text-4xl font-bold mb-4 text-gray-800">{event.title}</h1>
+          <p className="text-gray-600 text-sm mb-2">{new Date(event.date).toLocaleString()}</p>
+          <p className="text-lg text-gray-700 mb-4">{event.description}</p>
+          <p className="text-gray-500 text-md">Location: {event.location}</p>
         </div>
+        <button
+          onClick={() => router.push('/home')}
+          className="mt-8 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors"
+        >
+          Back to Events
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default EventDetailsPage;
