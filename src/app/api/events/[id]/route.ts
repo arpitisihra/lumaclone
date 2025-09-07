@@ -1,21 +1,16 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     if (!id) {
       return NextResponse.json({ message: 'Event ID is required' }, { status: 400 });
     }
 
     const event = await prisma.event.findUnique({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
     if (!event) {
@@ -28,16 +23,3 @@ export async function GET(
     return NextResponse.json({ message: 'Failed to fetch event details' }, { status: 500 });
   }
 }
-```
----
-
-### Next Steps: Apply, Commit, and Push 🚀
-Once you have replaced the content of your `route.ts` file with the code above and saved it, you can push the changes to GitHub.
-
-1.  Open your Terminal and navigate to your `lumaclone` project folder.
-2.  Run the following commands one by one:
-    ```bash
-    git add "src/app/api/events/[id]/route.ts"
-    git commit -m "Fix: Corrected GET function signature for dynamic API route"
-    git push origin main
-    
