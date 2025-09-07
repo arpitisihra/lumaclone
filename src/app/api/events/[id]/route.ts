@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request, context: { params: { id: string } }) {
   try {
-    const id = request.nextUrl.pathname.split('/').pop();
+    const { id } = context.params;
 
     if (!id) {
       return NextResponse.json({ message: 'Event ID is required' }, { status: 400 });
@@ -20,9 +20,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ event }, { status: 200 });
   } catch (error) {
     console.error('Error fetching single event:', error);
-    return NextResponse.json(
-      { message: 'Failed to fetch event details' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Failed to fetch event details' }, { status: 500 });
   }
 }
